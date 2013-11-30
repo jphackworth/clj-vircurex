@@ -1,0 +1,320 @@
+
+  Vircurex </welcome/index>
+
+	Login </welcome/login> | Signup </welcome/register>
+De </welcome/set_de> Gb </welcome/set_en> Fr </welcome/set_fr> Cn
+</welcome/set_cn> Ru </welcome/set_ru>
+
+
+  Info API
+
+
+
+The API supportes the following formats:
+
+  * XML
+  * JSON
+
+
+We currently provide the following API calls to extract information from
+the Exchange
+API Function	Parameters	Description
+get_lowest_ask	base
+alt	Returns the lowest asking price for a currency pair. Specify the
+base and alt currency name.
+get_highest_bid	base
+alt	Returns the highest bid price for a currency pair. Specify the base
+and alt currency name.
+get_last_trade	base
+alt	Returns executed unitprice of the last trade for a currency pair.
+Specify the base and alt currency name.
+get_volume	base
+alt	Returns the trading volume within the last 24 hours for a currency
+pair. Specify the base and alt currency name.
+get_info_for_currency	- none - 	Returns a summary information for all
+supported currencies
+get_info_for_1_currency	base
+alt	Returns a summary information for a currency pair
+orderbook	base
+alt	Returns the complete orderbook for the given currency pair. Note:
+mutliple items may appear for the same price
+orderbook_alt	alt	Returns the complete orderbook for all currency pair
+for alt given. This is more efficient than calling api/orderbook for
+each combination
+trades	base
+alt
+since	Returns all executed trades of the past 7 days. If the parameter
+"since" is provided, then only trades with an order ID greater than
+"since" will be returned.
+get_currency_info		Returns information about withdrawal fees, number of
+required confirmations for deposits and max. daily withdrawal
+
+You will need to append .XML or JSON respectively to define the format
+you want returned.
+
+Valid values for currency names:
+
+  * ANC
+  * BTC
+  * DGC
+  * DVC
+  * FRC
+  * FTC
+  * I0C
+  * IXC
+  * LTC
+  * NMC
+  * NVC
+  * PPC
+  * TRC
+  * WDC
+  * XPM
+
+
+*Frequency for the above API calls:* The API returns live values. We
+reserve the right to block IPs that are continuously polling the API in
+less than 5 Seconds intervals. Should you have the need to call the API
+more frequently, let us know, we'll work out a solution for you.
+
+
+
+      Examples
+
+
+  * https://vircurex.com/api/get_info_for_currency.xml will return a
+    summary for all currencies in XML format
+  * https://vircurex.com/api/get_highest_bid.json?base=BTC&alt=NMC will
+    return the highest bid (buy price) in NMC for 1 BTC in JSON format
+
+
+
+  Trade API
+
+
+The trade API provides functions that allow to perform trading activities.
+
+
+      Notice
+
+The trading API is released in its version 1.0. If we change the API
+call's then we will be releasing a new version and keep the previous
+version available for a specified period of time. Any changes will of
+course be communicated in the Announcement and News section but if you
+wish to subscribe to our API mailing lists then send us a short email
+(customerservice@vircurex.com).
+
+
+      Activating the API
+
+The trading API needs to be activated before it can be used. The API
+accesses your account information and allows to create and execute
+orders, hence all connections are via HTTPS only. In addition, you need
+to specify a security word for each of the API functions. The trading
+API is activated in your user profile.
+
+
+      List of API functions
+
+API Function	Parameters In	Parameters Out	Description	Token calculation
+get_balance	currency	balance
+available_balance	Provide the name of the currency for which you want to
+inquire the balance.	Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;get_balance;CurrencyName
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;get_balance;Balance
+get_balances		balance
+available_balance		Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;get_balances
+Note: the security word of this function is the security word from
+function "get_balance".
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;get_balances
+create_order	ordertype
+amount
+currency1
+unitprice
+currency2
+	orderid	Creates a new order. A maximum of 100 open orders are allowed
+at any point in time. The order is only saved but not released, hence it
+will not be traded before you release it.
+Values for ordertype: BUY, SELL	Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;create_order;ordertype;amount;currency1;unitprice;currency2
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;create_order;order_id
+release_order	orderid	orderid	Release the order for trading.
+IMPORTANT: The input orderid is NOT the same as the output orderid, you
+must use the output orderID for further API calls pertaining to an
+order. Though the two numbers might be identical, they are independent,
+unreleased order IDs are not the same as the released order IDs	Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;release_order;orderid
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;release_order;orderid
+delete_order	orderid
+otype	orderid	Deletes/closes an order.	Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;delete_order;orderid;otype
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;delete_order;orderid
+read_order	orderid
+otype	currency1
+currency2
+open_quantity
+quantity
+unitprice
+ordertype
+orderstatus
+lastchangedat
+releasedat	Returns order information	Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;read_order;orderid
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;read_order;orderid
+read_orders	otype	numberorders
+otype
+_For each order:_
+currency1
+currency2
+openquantity
+quantity
+unitprice
+ordertype
+orderstatus
+lastchangedat
+releasedat	Returns order information for all users' saved or released
+orders. It does not return information on closed (either manually closed
+or closed due to order execution) or deleted orders.	Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;read_orders
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;read_order
+read_orderexecutions	orderid	currency1
+currency2
+quantity
+unitprice
+feepaid
+ordertype
+	Returns the order execution info, i.e. the actual trades that were
+executed against the order	Input token:
+ YourSecurityWord;YourUserName;Timestamp;ID;read_orderexecutions;orderid
+Output token:
+ YourSecurityWord;YourUserName;Timestamp;
+create_coupon	amount
+currency	coupon
+amount
+currency	Creates a coupon	Input token:
+YourSecurityWord;YourUserName;Timestamp;ID;redeem_oupon;amount;currency
+Output token:
+YourSecurityWord;YourUserName;Timestamp;create_coupon;coupon;amount;currency
+redeem_coupon	coupon	coupon
+amount
+currency	Redeems the coupon and credits the amount to the users account
+Input token:
+YourSecurityWord;YourUserName;Timestamp;create_coupon;coupon
+Output token:
+YourSecurityWord;YourUserName;Timestamp;redeem_coupon;coupon;amount;currency
+
+
+Notes on the parameters:
+
+  * The sequence of the parameters is irrelevant. The sequence when
+    putting together the token is crucial.
+  * YourUserName: Provide your login name, not your eMail address. The
+    value is case sensitive.
+  * Securityword: The security word you have entered for the respective
+    API call in your user settings. The value is case sensitive.
+  * Ordertype: values are SELL or BUY
+  * currency: Use the currency short forms, e.g. USD, BTC, NMC, etc.
+  * Prices and quantities: Use . as a decimal seperator. Do not use
+    thousands separator
+  * Otype: Set otype=0 for unreleased orders, otype=1 for released orders
+
+
+Apart from the parameters listed on the table above, the following four
+parameters must always be supplied:
+Parameter 	Description
+account	Your login name, not the email address
+id	Any value. The ID value cannot be reused within a period of 10
+minutes. This is to safeguard against accidental double postings as well
+as URL replays by malicious sources.
+token	A SHA2 hash across a number of input values. See below detils on
+how to calculate it
+timestamp	A UTC timestamp, must be within 5 minutes of the current time
+
+
+      Calculation of the Token
+
+The token is calculated by concatenating the input parameters, separated
+by a semi-colon and then calculating a SHA2-256 hash over the complete
+string. See the column "Token calculation" in the above function API
+list for the required fields that need to be included to calculate the
+hash.
+Here an examples (in Ruby) for creating an order:
+
+ t = Time.now.gmtime.strftime("%Y-%m-%dT%H:%M:%S")
+ trx_id = Digest::SHA2.hexdigest("#{t}-#{rand}")
+ user_name = "MY_USER_NAME"
+ secret_word = "123456789"
+ tok =
+Digest::SHA2.hexdigest("#{secret_word};#{user_name};#{t};#{trx_id};create_order;sell;10;btc;50;nmc")
+ Order.call_https("https://vircurex.com","/api/create_order.json?account=#{user_name}&id=#{trx_id}&token=#{tok}&timestamp=#{t}&ordertype=sell&amount=10&currency1=btc&unitprice=50&currency2=nmc")
+
+
+ def self.call_https(my_url,my_params)
+  uri = URI.parse(my_url)
+  http = Net::HTTP.new(uri.host, '443')
+  http.use_ssl = true
+  http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+  response=""
+  resp=""
+  http.start do |http|
+   cmd = my_params
+   req = Net::HTTP::Get.new(cmd)
+   response = http.request(req)
+   resp = response.body
+  end
+  return ActiveSupport::JSON.decode(resp)
+ end
+
+
+      Error codes
+
+
+Error Code 	Description
+1	Order does not exist
+2	Order does not belong to the user
+3	Order is already released
+4	Unknown account name
+5	Unknown order type
+6	Missing parameter
+7	Order is not released
+8	Unknown currency
+9	API not configured, either not active or blank security word
+10	Insufficient funds. Your available balance is less than the quantity
+you have specified in the API call
+12	Currency is missing
+13	Currency is not allowed. Currency1 cannot be a fiat currency
+14	Order type is missing
+15	Unknown order type
+16	Trading the specified currency pair is not allowed
+17	Order is already closed
+18	Unknown order type. Only values 0 or 1 are allowed.
+100	The ID was used already within the last 10 minutes.
+200	The order volume (quantity * unitprice) must be at least 0.0001
+201	Maximum number of open orders reached. A maximum of 50 are allowed
+7999	Functions not active. You have not activated this function in your
+user profile
+8000	Timestamp is off by more than 5 Minutes.
+8001	API function is not activated
+8002	User is banned from using the API
+8003	Authentication failed
+9999	Unspecified error. Please contact customerservice.
+
+
+We reserve the right to block API calls from users whom we believe are
+making the API calls without the true intention of executing orders, but
+merely trying to disrupt the operation of the exchange.
+
+
+
+
+
+Help </welcome/help> Fees </welcome/help> API </welcome/api> Privacy
+</welcome/privacy> Investors </welcome/investors> Changelog
+</welcome/changelog> Contact us </welcome/contactus>

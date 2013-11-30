@@ -1,0 +1,15 @@
+(defproject clj-vircurex "0.1.0-SNAPSHOT"
+  :description "Vircurex API library"
+  :url "https://github.com/jphackworth/clj-vircurex"
+  :license {:name "MIT License"
+            :url "http://opensource.org/licenses/MIT"}
+  :dependencies [[org.clojure/clojure "1.5.1"]
+   [clj-json "0.5.3"]
+    [org.clojure/data.json "0.2.3"]
+    [clj-http "0.7.7"]
+    [clj-time "0.6.0"]
+    [pandect "0.3.0"]
+    [clj-toml "0.3.1"]]
+  :main ^:skip-aot clj-vircurex.core
+  :target-path "target/%s"
+  :profiles {:uberjar {:aot :all}})

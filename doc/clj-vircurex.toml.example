@@ -1,0 +1,11 @@
+username = ""
+api-url-base = "https://vircurex.com/api"
+[keys]
+get_balance = ""
+get_balances = ""
+read_order = ""
+read_orders = ""
+delete_order = ""
+release_order = ""
+read_order_executions = ""
+create_order = ""

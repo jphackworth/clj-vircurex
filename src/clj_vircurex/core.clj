@@ -4,14 +4,11 @@
   (:require [clj-http.client :as client])
   (:use [pandect.core])
   (:use [clj-time.local])
-  (:use [clj-time.core])
+  (:require [clj-time.core :as j])
   (:use [clj-time.format])
   (:use [clj-toml.core])
   (:use [clojure.java.io])
-
   )
-
-
 
 (def built-in-formatter (formatters :date-hour-minute-second))
 (def api-url-base "https://vircurex.com/api")
@@ -30,7 +27,7 @@
 
 (defn get-timestamp
   "Returns timestamp for constructing API requests" []
-  (unparse built-in-formatter (now)))
+  (unparse built-in-formatter (j/now)))
 
 (defn get-transaction-id
   "Calculates token to use with an API call." [timestamp]
@@ -92,10 +89,7 @@
   (def url (format "%s/read_orders.json?account=%s&id=%s&token=%s&timestamp=%s&otype=%s"
       api-url-base *username* txid (get-token "read_orders" t txid) t otype
       ))
-  (api-get url)
-
-
-  )
+  (api-get url))
 
 (defn get-market-data
   "Returns market data from Vircurex in PersistentMap format"

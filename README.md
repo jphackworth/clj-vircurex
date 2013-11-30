@@ -2,7 +2,7 @@
 
 Vircurex (https://vircurex.com) trading API library for Clojure.
 
-Warning. This is nowhere near complete.
+WARNING: This is incomplete.
 
 ## Installation
 
@@ -10,25 +10,34 @@ Download from https://github.com/jphackworth/clj-vircurex.
 
 ## Usage
 
-FIXME: explanation
+### Configuration
 
-    $ java -jar clj-vircurex-0.1.0-standalone.jar [args]
+See the example configuration file in doc/clj-vircurex.toml.example
 
-## Options
+Create a file in $HOME/.clj-vircurex.toml using the above as a template. Fill out the keys
+to match your settings on Vircurex.
 
-FIXME: listing of options this app accepts.
+    $ git clone https://github.com/jphackworth/clj-vircurex.git
+    $ cd clj-vircurex
+    $ lein repl
 
-## Examples
+## Implemented
 
-...
+* Get market data: (clj-vircurex.core/get-market-data)
+* Get open orders: (clj-vircurex.core/read-orders 1)
+* Get your balances: (clj-vircurex.core/get-balances)
+* Get you balance for a given currency: (clj-vircurex.core/get-balance "ltc")  
+
+### Usage / Examples
+
+    $ cd clj-vircurex
+    $ lein repl
+    clj-vircurex.core=> (clj-vircurex.core/get-market-data)
+    clj-vircurex.core=> ((((clj-vircurex.core/get-market-data) :LTC) :BTC) :last_trade) 
 
 ### Bugs
 
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+Lots of API functionality isn't implemented.
 
 ## License
 

@@ -1,5 +1,10 @@
 username = ""
-api-url-base = "https://vircurex.com/api"
+[urls]
+base = "https://vircurex.com/api"
+market-data = "get_info_for_currency.json"
+get_balances = "get_balances.json"
+get_balance = "get_balance.json"
+read_orders = "read_orders.json"
 [keys]
 get_balance = ""
 get_balances = ""

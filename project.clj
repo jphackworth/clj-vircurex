@@ -1,5 +1,5 @@
-(defproject clj-vircurex "0.1.0-SNAPSHOT"
-  :description "Vircurex API library"
+(defproject clj-vircurex "0.0.1-SNAPSHOT"
+  :description "Vircurex Trading API library"
   :url "https://github.com/jphackworth/clj-vircurex"
   :license {:name "MIT License"
             :url "http://opensource.org/licenses/MIT"}
@@ -9,7 +9,8 @@
     [clj-http "0.7.7"]
     [clj-time "0.6.0"]
     [pandect "0.3.0"]
-    [clj-toml "0.3.1"]]
+    [clj-toml "0.3.1"]
+    [clojurewerkz/quartzite "1.1.0"]]
   :main ^:skip-aot clj-vircurex.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

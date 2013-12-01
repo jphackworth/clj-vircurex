@@ -10,6 +10,7 @@
   (:use [clj-time.format])
   (:use [clj-toml.core])
   (:use [clojure.java.io])
+  (:use [table.core :only [table]])
   )
 
 (def built-in-formatter (formatters :date-hour-minute-second))
@@ -57,6 +58,7 @@
 ;(def ^:dynamic *config* (load-config))
 ;(def ^:dynamic *username* (*config* "username"))
 ;(def ^:dynamic *api-keys* (*config* "keys"))
+
 
 (defn coerce-unformattable-types [args]
   (map (fn [x]
@@ -152,5 +154,14 @@
   (println "Last LTC trade was:",(((market-data :LTC) :BTC) :last_trade),"BTC")
   (println "Time now is:",(local-now))
   )
+
+(defn print-order
+  [order]
+  (table [["Currency1" "Currency2" "Unit Price" "Order Type" "Quanity" "Open Quantity"]
+    [(order "currency1") (order "currency2") (order "unitprice") (order "ordertype") (order "quantity") (order "openquantity")]]
+    )
+
+  )
+
 
 (read-config)

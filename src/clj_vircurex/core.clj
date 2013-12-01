@@ -58,6 +58,16 @@
 ;(def ^:dynamic *username* (*config* "username"))
 ;(def ^:dynamic *api-keys* (*config* "keys"))
 
+(defn coerce-unformattable-types [args]
+  (map (fn [x]
+         (cond (instance? clojure.lang.BigInt x) (biginteger x)
+               (instance? clojure.lang.Ratio x) (double x)
+               :else x))
+       args))
+
+(defn format-plus [fmt & args]
+  (apply format fmt (coerce-unformattable-types args)))
+
 (defn get-timestamp
   "Returns timestamp for constructing API requests" []
   (unparse built-in-formatter (j/now)))
@@ -77,19 +87,22 @@
     "get_balances" (sha256 (format "%s;%s;%s;%s;get_balances" api-key (username) t txid))
     "get_balance" (sha256 (format "%s;%s;%s;%s;get_balance;%s" api-key (username) t txid (nth args 0)))
     "read_orders" (sha256 (format "%s;%s;%s;%s;read_orders" api-key (username) t txid))
+    "create_order" (sha256 (format "%s;%s;%s;%s;create_order;%s;%s;%s;%s;btc" api-key (username) t txid (nth args 0) (nth args 1) (nth args 2) (nth args 3)    ))
   ))
 
 (defn api-get
   "Make a get request to the server"
   [url]
-  (json/read-str ((client/get url) :body) :key-fn keyword))
+  (json/read-str ((client/get url) :body)))
 
 (defn query-for
   "Create query for specified API call" [api-call args]
   (case api-call
     "get_balances" ""
     "get_balance" (format "&currency=%s" (nth args 0))
-    "read_orders" (format "&otype=%s" (nth args 0)))
+    "read_orders" (format "&otype=%s" (nth args 0))
+    "create_order" (format "&ordertype=%s&amount=%s&currency1=%s&unitprice=%s&currency2=btc"
+      (nth args 0) (nth args 1) (nth args 2) (nth args 3)))
   )
 
 (defn url-for
@@ -114,43 +127,13 @@
 (defn read-orders [otype]
   (api-get (url-for "read_orders" otype)))
 
-; (defn get-balances
-;   "Get your balances via Vircurex API." []
-;   (def t (get-timestamp))
-;   (def txid (get-transaction-id t))
-;   (def url (format "%s/get_balances.json?account=%s&id=%s&token=%s&timestamp=%s"
-;       api-url-base (username) txid (token-for "get_balances" t txid) t
-;       ))
-;   (api-get url))
+(defn create-order [otype currency & args]
+  (def amount (nth args 0))
+  (def unitprice (float (nth args 1)))
 
-; get-balance:
-; YourSecurityWord;YourUserName;Timestamp;ID;get_balance;CurrencyName
-; (defn get-balance
-;   "Get your Vircurex balance via API."
-;   [currency]
-;   (def t (get-timestamp))
-;   (def txid (get-transaction-id t))
-;   ;(def token (sha256 (format "%s;%s;%s;%s;get_balance;%s" x-api-key x-username t txid currency)))
-;   (def url (format "%s/get_balance.json?account=%s&id=%s&token=%s&timestamp=%s&currency=%s"
-;       api-url-base *username* txid (token-for "get_balance" t txid currency) t currency
-;       ))
-;   (api-get url)
-
-;   ;(def balance_json ((client/get url) :body) )
-;   ;(def balance (json/read-str balance_json :key-fn keyword))
-;   ;(println (format "%s balance: %d" currency (balance :balance)))
-;   ;(balance :balance)
-;   )
-;  YourSecurityWord;YourUserName;Timestamp;ID;read_order;orderid
-; (defn read-orders
-;   "Returns order information for all users' saved or released orders"
-;   [otype]
-;   (def t (get-timestamp))
-;   (def txid (get-transaction-id t))
-;   (def url (format "%s/read_orders.json?account=%s&id=%s&token=%s&timestamp=%s&otype=%s"
-;       api-url-base *username* txid (token-for "read_orders" t txid) t otype
-;       ))
-;   (api-get url))
+  (printf "Creating %s order for %s of %s at %.8f BTC\n" otype amount currency unitprice)
+  (api-get (url-for "create_order" otype amount  currency unitprice))
+  )
 
 (defn get-market-data
   "Returns market data from Vircurex in PersistentMap format"

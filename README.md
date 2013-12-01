@@ -8,6 +8,8 @@ WARNING: This is incomplete.
 
 Download from https://github.com/jphackworth/clj-vircurex.
 
+This assumes an environment with Clojure 1.5.1 and Leiningen (https://github.com/technomancy/leiningen) installed.
+
 ## Usage
 
 ### Configuration
@@ -23,17 +25,17 @@ to match your settings on Vircurex.
 
 ## Implemented
 
-* Get market data: (clj-vircurex.core/get-market-data)
-* Get open orders: (clj-vircurex.core/read-orders 1)
-* Get your balances: (clj-vircurex.core/get-balances)
-* Get you balance for a given currency: (clj-vircurex.core/get-balance "ltc")  
+* Get market data: (get-market-data)
+* Get open orders: (read-orders 1)
+* Get your balances: (get-balances)
+* Get you balance for a given currency: (get-balance "ltc")  
 
 ### Usage / Examples
 
     $ cd clj-vircurex
     $ lein repl
-    clj-vircurex.core=> (clj-vircurex.core/get-market-data)
-    clj-vircurex.core=> ((((clj-vircurex.core/get-market-data) :LTC) :BTC) :last_trade) 
+    clj-vircurex.core=> (get-market-data)
+    clj-vircurex.core=> ((((get-market-data) :LTC) :BTC) :last_trade) 
 
 ### Bugs
 

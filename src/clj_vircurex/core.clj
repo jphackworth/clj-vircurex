@@ -126,8 +126,12 @@
 (defn get-balance [currency]
   (api-get (url-for "get_balance" currency)))
 
-(defn read-orders [otype]
-  (api-get (url-for "read_orders" otype)))
+(defn read-orders [otype & args]
+  (def orders (api-get (url-for "read_orders" otype)))
+  (case true
+    true  (select-keys orders (for [[k v] orders :when (re-find #"^order-.+$" k)] k))
+    "default" orders)
+  )
 
 (defn create-order [otype currency & args]
   (def amount (nth args 0))
@@ -163,5 +167,9 @@
 
   )
 
+; (defn print-orders 
+;   (def order-keys (filter (fn [x] (re-find #"^order-.+$" x)) (keys (read-orders 1))))
+;   (table [["#" "Type" "Open Quantity" "Quantity" "Price"]
+;     ]))
 
 (read-config)

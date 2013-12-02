@@ -58,9 +58,14 @@ to match your settings on Vircurex.
     #'clj-vircurex.core/*config*
     user=>     
 
-### Using in another Clojure Application
+### Using in a Clojure Application
 
-Sorry, have not yet uploaded to clojars... will be doing so very soon!
+This library is available on Clojars: [https://clojars.org/clj-vircurex](https://clojars.org/clj-vircurex)
+
+If you're using Leiningen:
+
+- Add [clj-vircurex "0.0.1"] to project.clj as a dependency
+- In your source code, (:use [clj-vircurex.core])
 
 ## API
 

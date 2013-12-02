@@ -1,4 +1,4 @@
-(defproject clj-vircurex "0.0.1-SNAPSHOT"
+(defproject clj-vircurex "0.0.1"
   :description "Trading API library for Vircurex"
   :url "https://github.com/jphackworth/clj-vircurex"
   :license {:name "Mozilla Public License Version 2.0"

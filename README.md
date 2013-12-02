@@ -30,6 +30,7 @@ See the example configuration file in [doc/clj-vircurex.toml.example](https://gi
      
     $ cd clj-vircurex 
     $ cp doc/clj-vircurex.toml.example $HOME/.clj-vircurex.toml
+    $ chmod 600 $HOME/.clj-vircurex.toml
     $ vi $HOME/.clj-vircurex.toml 
 
 Create a file in $HOME/.clj-vircurex.toml using the above as a template. Fill out the keys

@@ -1,5 +1,12 @@
+; Copyright (C) 2013 John. P Hackworth
+;
+; This Source Code Form is subject to the terms of the Mozilla Public
+; License, v. 2.0. If a copy of the MPL was not distributed with this
+; file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+
 (ns clj-vircurex.core
-  (:gen-class)
+ 
   (:require [clojure.data.json :as json])
   (:require [clj-http.client :as client])
   (:use [pandect.core])
@@ -8,6 +15,8 @@
   (:use [clj-time.format])
   (:use [clj-toml.core])
   (:use [clojure.java.io]))
+
+;  (:gen-class)
 
 (def built-in-formatter (formatters :date-hour-minute-second))
 
@@ -217,26 +226,4 @@
   ;(json/read-str market_json :key-fn keyword))
 (json/read-str market-json))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Retrieving Market Data")
-  (def market-data (get-market-data))
-  (println "Last LTC trade was:",(((market-data :LTC) :BTC) :last_trade),"BTC")
-  (println "Time now is:",(local-now))
-  )
-
-; (defn print-order
-;   [order]
-;   (table [["Currency1" "Currency2" "Unit Price" "Order Type" "Quanity" "Open Quantity"]
-;     [(order "currency1") (order "currency2") (order "unitprice") (order "ordertype") (order "quantity") (order "openquantity")]]
-;     )
-
-;   )
-
-; (defn print-orders 
-;   (def order-keys (filter (fn [x] (re-find #"^order-.+$" x)) (keys (read-orders 1))))
-;   (table [["#" "Type" "Open Quantity" "Quantity" "Price"]
-;     ]))
-
-(read-config)
+; (read-config)

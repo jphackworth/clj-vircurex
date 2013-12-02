@@ -6,45 +6,87 @@ WARNING: This is alpha software. Do not use in production.
 
 ## Installation
 
-      $ git clone https://github.com/jphackworth/clj-vircurex.
+    $ git clone https://github.com/jphackworth/clj-vircurex
+
 
 This assumes an environment with Clojure 1.5.1 and [Leiningen](https://github.com/technomancy/leiningen) installed.
 
-## Usage
+## Configuration
 
-### Configuration
+### Set your API keys
+
+- Login to your Vircurex account
+- Click "Settings"
+- Click "API"
+- Select the checkboxes for API features you want to enable
+- For each enabled feature, enter a strong password (20+ characters) in the input field
+- Click save at the bottom of the page to apply
+
+More info can be found here: [Vircurex Trading API Documentation](https://vircurex.com/welcome/api)
+
+### Setup Configuration File
 
 See the example configuration file in [doc/clj-vircurex.toml.example](https://github.com/jphackworth/clj-vircurex/blob/master/doc/clj-vircurex.toml.example)
+     
+    $ cd clj-vircurex 
+    $ cp doc/clj-vircurex.toml.example $HOME/.clj-vircurex.toml
+    $ vi $HOME/.clj-vircurex.toml 
 
 Create a file in $HOME/.clj-vircurex.toml using the above as a template. Fill out the keys
 to match your settings on Vircurex.
 
-    $ git clone https://github.com/jphackworth/clj-vircurex.git
+## Usage
+
+### Using Interactively in REPL
+
     $ cd clj-vircurex
     $ lein repl
+    nREPL server started on port 52856 on host 127.0.0.1
+    REPL-y 0.3.0
+    Clojure 1.5.1
+        Docs: (doc function-name-here)
+              (find-doc "part-of-name-here")
+      Source: (source function-name-here)
+     Javadoc: (javadoc java-object-or-class-here)
+        Exit: Control+D or (exit) or (quit)
+     Results: Stored in vars *1, *2, *3, an exception in *e
 
-## Implemented
+    user=> (use 'clj-vircurex.core)
+    nil
+    user=> (read-config) ; loads up config from $HOME/.clj-vircurex.toml 
+    #'clj-vircurex.core/*config*
+    user=>     
+
+### Using in another Clojure Application
+
+Sorry, have not yet uploaded to clojars... will be doing so very soon!
+
+## API
+
+### Design Discussion
+
+Most authenticated api calls have two ways of using them.
+
+The "full" version which more closely matches the [trading API documentation](https://vircurex.com/welcome/api), and a "simplified" version which usually reduces verbosity, intended for interactive use at repl console. 
+
+Generally speaking, the full version function name will have a -order/-orders. For instance: 
+
+    (create-order :buy :ltc 1.005 0.008) ; versus 
+    (buy :ltc 1.005 0.008)
+
+    (delete-order 12345) ; versus
+
+    (def myorder (buy :ltc 1.005 0.0008))
+    (delete (myorder)) 
+
+### Library Functions
 
 * [Get Market Data](https://github.com/jphackworth/clj-vircurex#get-market-data)
 * [Read Orders](https://github.com/jphackworth/clj-vircurex#read-orders)
 * [Get Balances](https://github.com/jphackworth/clj-vircurex#get-balances)
 * [Create Order](https://github.com/jphackworth/clj-vircurex#create-order)
 * [Delete Order](https://github.com/jphackworth/clj-vircurex#delete-order)
-* [Release Order](https://github.com/jphackworth/clj-vircurex#release-order)
-
-### Design Discussion
-
-Most authenticated api calls have two ways of using them.
-
-The "full" version which most closely matches the API documentation, and a "simplified" version which usually reduces verbosity. 
-
-Generally speaking, the full version function name will have a -order/-orders. For instance: 
-
-      (delete-order [x]) ; versus 
-      (delete [x]) 
-
-      (create-order [otype currency amount unitprice]) ; versus 
-      (buy [currency amount unitprice])
+* [Release Order](https://github.com/jphackworth/clj-vircurex#release-order)      
 
 ### Get market data
 
@@ -82,7 +124,7 @@ To get a balance for specific currency
 
 ### Create Order
 
-Full create-order version:
+Full version:
 
     (create-order :buy :ltc 1.0005 0.0008) ; order type, currency, amount, unit price
     (create-order :sell :ltc 1.0005 10.001)
@@ -94,19 +136,21 @@ Simplified buy/sell:
 
 ### Delete Order
 
-Full delete-order version:
+Full version:
 
     (delete-order 12345) ; orderid  
     (delete-order 12346) ; orderid 
-
-NOTE: There appears to be a bug/mistake in the API documentation. create_order gives you an orderid but no order type. delete-order requires both orderid and order type. It turns out that delete order doesn't care what the order type supplied is, so long as it's provided. So what I've done is supply "test" as the order type. The API happily deletes the order regardless.
-
-To Vircurex developers, please update API to only require orderid. It looks like you only care about it, so maybe you've just left in otype for backwards compatibility?
 
 Simplified delete example:
 
     (def my-order (buy :ltc 1.005 0.0008)) ; saves order info to "my-order"
     (delete my-order)
+
+#### Issues with Delete Order API and workaround
+
+There appears to be a bug/mistake in the API documentation. create_order gives you an orderid but no order type. delete-order requires both orderid and order type. It turns out that delete order doesn't care what the order type supplied is, so long as it's provided. So what I've done is supply "test" as the order type. The API happily deletes the order regardless.
+
+To Vircurex developers, please update API to only require orderid. 
 
 ### Release Order
 
@@ -127,4 +171,4 @@ No testing implemented. You should not use this in production.
 
 Copyright © 2013 John P. Hackworth
 
-Distributed under the MIT License
+Distributed under the Mozilla Public License Version 2.0

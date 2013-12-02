@@ -84,6 +84,8 @@
       api-key (username) t txid (nth args 0) (nth args 1) (nth args 2) (nth args 3)))
     "delete_order" (sha256 (format "%s;%s;%s;%s;delete_order;%s;%s"
       api-key (username) t txid (nth args 0) (nth args 1)))
+    "release_order" (sha256 (format "%s;%s;%s;%s;release_order;%s"
+      api-key (username) t txid (nth args 0)))
 
   ))
 
@@ -96,7 +98,8 @@
     "read_orderexecutions" (format "&orderid=%s" (nth args 0))
     "create_order" (format "&ordertype=%s&amount=%s&currency1=%s&unitprice=%s&currency2=btc"
       (nth args 0) (nth args 1) (nth args 2) (nth args 3))
-    "delete_order" (format "&orderid=%s&otype=%s" (nth args 0) (nth args 1)))
+    "delete_order" (format "&orderid=%s&otype=%s" (nth args 0) (nth args 1))
+    "release_order" (format "&orderid=%s" (nth args 0)))
   )
 
 (defn url-for
@@ -132,23 +135,32 @@
     "default" orders))
 
 (defn delete-order 
-  "(delete-order <orderid> <BUY|SELL>" [orderid otype]
-    (api-get (url-for "delete_order" orderid otype)))
+  "(delete-order <orderid>" [orderid]
+    ; (api-get (url-for "delete_order" orderid (clojure.string/upper-case (name otype))))
+    (api-get (url-for "delete_order" orderid "test"))
 
+      )
+
+(defn release-order
+  "Release order for execution." [orderid]
+  (api-get (url-for "release_order" orderid))
+
+
+  )
 
 (defn create-order 
-  "(create-order <BUY|SELL> <currency> <amount> <unitprice>)" [otype currency & args]
+  "(create-order <:buy|:sell> <:currency> <amount> <unitprice>)" [otype currency & args]
   (def amount (nth args 0))
   (def unitprice (float (nth args 1)))
 
-  (printf "Creating %s order: %.8f %s at %.8f BTC\n" (clojure.string/lower-case otype) amount (clojure.string/upper-case currency) unitprice)
-  (api-get (url-for "create_order" otype amount  currency unitprice)))
+  (printf "Creating %s order: %.8f %s at %.8f BTC\n" (clojure.string/lower-case (name otype)) amount (clojure.string/upper-case (name currency)) unitprice)
+  (api-get (url-for "create_order" (clojure.string/upper-case (name otype)) amount (name currency) unitprice)))
 
 ; simplified calls
 
 (defn buy 
   "(buy <:currency> <amount> <unitprice>" [currency amount unitprice]
-    (def response (create-order "BUY" (name currency) amount unitprice))
+    (def response (create-order :buy currency amount unitprice))
     (keys response) 
     (case (response "status")
       0 (printf "Order ID: %s\n" (response "orderid"))
@@ -159,7 +171,7 @@
 
 (defn sell
   "(sell <:currency> <amount> <unitprice>" [currency amount unitprice]
-    (def response (create-order "SELL" (name currency) amount unitprice)) 
+    (def response (create-order :sell currency amount unitprice)) 
     (case (response "status")
       0 (printf "Order ID: %s\n" (response "orderid"))
       (printf "Error: %s\n" (response "statustxt"))
@@ -167,17 +179,24 @@
     response
     )
 
-(defn released-orders
+(defn released
   "Read released orders" []
   (read-orders 1))
 
-(defn unreleased-orders
+(defn unreleased
   "Read unreleased orders" []
   (read-orders 0))
 
 (defn delete
-  "Deletes the supplied order" [order]
-  (delete-order (order "orderid") (order "otype"))
+  "Deletes order based on the orderid in supplied map" [order]
+  (delete-order (order "orderid")) 
+  )
+
+(defn release 
+  "Releases the order based on the orderid in supplied map" [order]
+  (release-order (order "orderid"))
+
+
   )
 
 (defn get-market-data

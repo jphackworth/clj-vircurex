@@ -16,8 +16,6 @@
   (:use [clj-toml.core])
   (:use [clojure.java.io]))
 
-;  (:gen-class)
-
 (def built-in-formatter (formatters :date-hour-minute-second))
 
 ; config related functions
@@ -36,10 +34,7 @@
   "Returns the config in JSON" [] 
   (if (not (boolean (resolve '*config*) ))
     (def ^:dynamic *config* (read-config))
-    *config*
-
-
-    ))
+    *config*))
 
 (defn username
   "Returns the Vircurex account username" []
@@ -48,20 +43,6 @@
 (defn api-keys
   "Returns the API keys defined in $HOME/.clj-vircurex.toml" []
   (*config* "keys"))
-
-(defn urls
-  "Returns all URL paths for API calls" []
-  (*config* "urls"))
-
-; (defn coerce-unformattable-types [args]
-;   (map (fn [x]
-;          (cond (instance? clojure.lang.BigInt x) (biginteger x)
-;                (instance? clojure.lang.Ratio x) (double x)
-;                :else x))
-;        args))
-
-; (defn format-plus [fmt & args]
-;   (apply format fmt (coerce-unformattable-types args)))
 
 ; api call helpers
 
@@ -118,13 +99,12 @@
   "Create URL for specified API call" [api-call & args]
   (def t (get-timestamp))
   (def txid (get-transaction-id t))
-  (def base ((urls) "base"))
-  (def call-path ((urls) api-call))
+  (def base ((config) "url"))
   (def base-query (format "?account=%s&id=%s&token=%s&timestamp=%s" 
     (username) txid (token-for api-call t txid args) t))
   (def api-query (query-for api-call args))
 
-  (format "%s/%s%s%s" base call-path base-query api-query))
+  (format "%s/%s.json%s%s" base api-call base-query api-query))
 
 (defn api-get
   "Make a get request to the server"
@@ -143,21 +123,16 @@
   "(read-orders <0|1>)" [otype & args]
   (def orders (api-get (url-for "read_orders" otype)))
   (case true
-    true  (select-keys orders (for [[k v] orders :when (re-find #"^order-.+$" k)] k))
+    true  (vals (select-keys orders (for [[k v] orders :when (re-find #"^order-.+$" k)] k)))
     "default" orders))
 
 (defn read-order 
   "Read order based on supplied order id and type" [orderid]
-  (api-get (url-for "read_order" orderid "test"))
-
-  )
+  (api-get (url-for "read_order" orderid "test")))
 
 (defn delete-order 
   "(delete-order <orderid>" [orderid]
-    ; (api-get (url-for "delete_order" orderid (clojure.string/upper-case (name otype))))
-    (api-get (url-for "delete_order" orderid "test"))
-
-      )
+    (api-get (url-for "delete_order" orderid "test")))
 
 (defn release-order
   "Release order for execution." [orderid]
@@ -182,20 +157,16 @@
     (keys response) 
     (case (response "status")
       0 (printf "Order ID: %s\n" (response "orderid"))
-      (printf "Error: %s\n", (response "statustxt"))
-      )
-    response
-    )
+      (printf "Error: %s\n", (response "statustxt")))
+    response)
 
 (defn sell
   "(sell <:currency> <amount> <unitprice>" [currency amount unitprice]
     (def response (create-order :sell currency amount unitprice)) 
     (case (response "status")
       0 (printf "Order ID: %s\n" (response "orderid"))
-      (printf "Error: %s\n" (response "statustxt"))
-      )
-    response
-    )
+      (printf "Error: %s\n" (response "statustxt")))
+    response)
 
 (defn released
   "Read released orders" []
@@ -207,23 +178,15 @@
 
 (defn delete
   "Deletes order based on the orderid in supplied map" [order]
-  (delete-order (order "orderid")) 
-  )
+  (delete-order (order "orderid")))
 
 (defn release 
   "Releases the order based on the orderid in supplied map" [order]
-  (release-order (order "orderid"))
-
-
-  )
+  (release-order (order "orderid")))
 
 (defn get-market-data
   "Returns market data from Vircurex in PersistentMap format"
   [& args]
-  (def market-data-url "https://vircurex.com/api/get_info_for_currency.json")
+  (json/read-str ((client/get "https://vircurex.com/api/get_info_for_currency.json") :body)))
+  ;(json/read-str market-json))
 
-  (def market-json ((client/get market-data-url) :body) )
-  ;(json/read-str market_json :key-fn keyword))
-(json/read-str market-json))
-
-; (read-config)

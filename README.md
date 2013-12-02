@@ -106,6 +106,8 @@ The limit of fetch frequency is 5 seconds. While testing, to minimise being thro
 
 ### Read Orders
 
+NOTE: The format of data has changed between 0.0.1 and 0.0.2
+
 Full version:
 
     (read-orders 0) ; 0 = unreleased

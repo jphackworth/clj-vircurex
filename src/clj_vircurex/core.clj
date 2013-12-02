@@ -2,21 +2,16 @@
   (:gen-class)
   (:require [clojure.data.json :as json])
   (:require [clj-http.client :as client])
-  (:require [clojurewerkz.quartzite.scheduler :as qs]
-    [clojurewerkz.quartzite.triggers :as t])
   (:use [pandect.core])
   (:use [clj-time.local])
   (:require [clj-time.core :as j])
   (:use [clj-time.format])
   (:use [clj-toml.core])
-  (:use [clojure.java.io])
-  (:use [table.core :only [table]])
-  )
+  (:use [clojure.java.io]))
 
 (def built-in-formatter (formatters :date-hour-minute-second))
-(def api-url-base "https://vircurex.com/api")
 
-
+; config related functions
 
 (defn read-config
   "Load user config from $HOME/.clj-vircurex.toml" []
@@ -36,7 +31,6 @@
 
 
     ))
-  ;(read-config))
 
 (defn username
   "Returns the Vircurex account username" []
@@ -50,25 +44,17 @@
   "Returns all URL paths for API calls" []
   (*config* "urls"))
 
-  ; (if-not (.exists (as-file config-path)) 
-  ;   ((System/exit 1))) 
+; (defn coerce-unformattable-types [args]
+;   (map (fn [x]
+;          (cond (instance? clojure.lang.BigInt x) (biginteger x)
+;                (instance? clojure.lang.Ratio x) (double x)
+;                :else x))
+;        args))
 
-  ; (parse-string (slurp config-path)))
+; (defn format-plus [fmt & args]
+;   (apply format fmt (coerce-unformattable-types args)))
 
-;(def ^:dynamic *config* (load-config))
-;(def ^:dynamic *username* (*config* "username"))
-;(def ^:dynamic *api-keys* (*config* "keys"))
-
-
-(defn coerce-unformattable-types [args]
-  (map (fn [x]
-         (cond (instance? clojure.lang.BigInt x) (biginteger x)
-               (instance? clojure.lang.Ratio x) (double x)
-               :else x))
-       args))
-
-(defn format-plus [fmt & args]
-  (apply format fmt (coerce-unformattable-types args)))
+; api call helpers
 
 (defn get-timestamp
   "Returns timestamp for constructing API requests" []
@@ -86,16 +72,16 @@
   (def api-key ((api-keys) api-call))
  
   (case api-call
-    "get_balances" (sha256 (format "%s;%s;%s;%s;get_balances" api-key (username) t txid))
-    "get_balance" (sha256 (format "%s;%s;%s;%s;get_balance;%s" api-key (username) t txid (nth args 0)))
-    "read_orders" (sha256 (format "%s;%s;%s;%s;read_orders" api-key (username) t txid))
-    "create_order" (sha256 (format "%s;%s;%s;%s;create_order;%s;%s;%s;%s;btc" api-key (username) t txid (nth args 0) (nth args 1) (nth args 2) (nth args 3)    ))
-  ))
-
-(defn api-get
-  "Make a get request to the server"
-  [url]
-  (json/read-str ((client/get url) :body)))
+    "get_balances" (sha256 (format "%s;%s;%s;%s;get_balances" 
+      api-key (username) t txid))
+    "get_balance" (sha256 (format "%s;%s;%s;%s;get_balance;%s" 
+      api-key (username) t txid (nth args 0)))
+    "read_orders" (sha256 (format "%s;%s;%s;%s;read_orders" 
+      api-key (username) t txid))
+    "read_orderexecutions" (sha256 (format "%s;%s;%s;%s;read_orderexecutions:%s" 
+      api-key (username) t txid (nth args 0)))
+    "create_order" (sha256 (format "%s;%s;%s;%s;create_order;%s;%s;%s;%s;btc" 
+      api-key (username) t txid (nth args 0) (nth args 1) (nth args 2) (nth args 3)))))
 
 (defn query-for
   "Create query for specified API call" [api-call args]
@@ -103,13 +89,12 @@
     "get_balances" ""
     "get_balance" (format "&currency=%s" (nth args 0))
     "read_orders" (format "&otype=%s" (nth args 0))
+    "read_orderexecutions" (format "&orderid=%s" (nth args 0))
     "create_order" (format "&ordertype=%s&amount=%s&currency1=%s&unitprice=%s&currency2=btc"
-      (nth args 0) (nth args 1) (nth args 2) (nth args 3)))
-  )
+      (nth args 0) (nth args 1) (nth args 2) (nth args 3))))
 
 (defn url-for
   "Create URL for specified API call" [api-call & args]
-
   (def t (get-timestamp))
   (def txid (get-transaction-id t))
   (def base ((urls) "base"))
@@ -120,26 +105,66 @@
 
   (format "%s/%s%s%s" base call-path base-query api-query))
 
+(defn api-get
+  "Make a get request to the server"
+  [url]
+  (json/read-str ((client/get url) :body)))
+
+; api calls
+
 (defn get-balances []
   (api-get (url-for "get_balances")))
 
 (defn get-balance [currency]
   (api-get (url-for "get_balance" currency)))
 
-(defn read-orders [otype & args]
+(defn read-orders 
+  "(read-orders <0|1>)" [otype & args]
   (def orders (api-get (url-for "read_orders" otype)))
   (case true
     true  (select-keys orders (for [[k v] orders :when (re-find #"^order-.+$" k)] k))
-    "default" orders)
-  )
+    "default" orders))
 
-(defn create-order [otype currency & args]
+;(defn delete-order 
+
+(defn create-order 
+  "(create-order <BUY|SELL> <currency> <amount> <unitprice>)" [otype currency & args]
   (def amount (nth args 0))
   (def unitprice (float (nth args 1)))
 
-  (printf "Creating %s order for %s of %s at %.8f BTC\n" otype amount currency unitprice)
-  (api-get (url-for "create_order" otype amount  currency unitprice))
-  )
+  (printf "Creating %s order: %s %s at %s BTC\n" (clojure.string/lower-case otype) amount (clojure.string/upper-case currency) unitprice)
+  (api-get (url-for "create_order" otype amount  currency unitprice)))
+
+; simplified calls
+
+(defn buy 
+  "(buy <:currency> <amount> <unitprice>" [currency amount unitprice]
+    (def response (create-order "BUY" (name currency) amount unitprice))
+    (keys response) 
+    (case (response "status")
+      0 (printf "Order ID: %s\n" (response "orderid"))
+      (printf "Error: %s\n", (response "statustxt"))
+      )
+    response
+    )
+
+(defn sell
+  "(sell <:currency> <amount> <unitprice>" [currency amount unitprice]
+    (def response (create-order "SELL" (name currency) amount unitprice)) 
+    (case (response "status")
+      0 (printf "Order ID: %s\n" (response "orderid"))
+      (printf "Error: %s\n" (response "statustxt"))
+      )
+    response
+    )
+
+(defn released-orders
+  "Read released orders" []
+  (read-orders 1))
+
+(defn unreleased-orders
+  "Read unreleased orders" []
+  (read-orders 0))
 
 (defn get-market-data
   "Returns market data from Vircurex in PersistentMap format"
@@ -159,13 +184,13 @@
   (println "Time now is:",(local-now))
   )
 
-(defn print-order
-  [order]
-  (table [["Currency1" "Currency2" "Unit Price" "Order Type" "Quanity" "Open Quantity"]
-    [(order "currency1") (order "currency2") (order "unitprice") (order "ordertype") (order "quantity") (order "openquantity")]]
-    )
+; (defn print-order
+;   [order]
+;   (table [["Currency1" "Currency2" "Unit Price" "Order Type" "Quanity" "Open Quantity"]
+;     [(order "currency1") (order "currency2") (order "unitprice") (order "ordertype") (order "quantity") (order "openquantity")]]
+;     )
 
-  )
+;   )
 
 ; (defn print-orders 
 ;   (def order-keys (filter (fn [x] (re-find #"^order-.+$" x)) (keys (read-orders 1))))

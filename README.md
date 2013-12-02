@@ -25,10 +25,26 @@ to match your settings on Vircurex.
 
 ## Implemented
 
+### Get market data
+
+This does a live fetch of market data from Vircurex. It does not require authentication. 
+
+    (get-market-data)
+
+The limit of fetch frequency is 5 seconds. While testing, to minimise being throttled or blocked, save the market data to a variable and test with that:
+
+    (def mkt (get-market-data))
+
+
+
+### 
+
+
 * Get market data: (get-market-data)
 * Get open orders: (read-orders 1)
 * Get your balances: (get-balances)
 * Get you balance for a given currency: (get-balance "ltc")  
+* Create order: (create-order "SELL" "ltc" 10 0.05)
 
 ### Usage / Examples
 

@@ -9,9 +9,7 @@
     [clj-http "0.7.7"]
     [clj-time "0.6.0"]
     [pandect "0.3.0"]
-    [clj-toml "0.3.1"]
-    [clojurewerkz/quartzite "1.1.0"]
-    [table "0.4.0"]]
+    [clj-toml "0.3.1"]]
   :main ^:skip-aot clj-vircurex.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

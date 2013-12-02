@@ -125,7 +125,7 @@
   (api-get (url-for "get_balances")))
 
 (defn get-balance [currency]
-  (api-get (url-for "get_balance" currency)))
+  (api-get (url-for "get_balance" (name :currency))))
 
 (defn read-orders 
   "(read-orders <0|1>)" [otype & args]

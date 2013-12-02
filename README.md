@@ -1,20 +1,20 @@
 # clj-vircurex
 
-Vircurex (https://vircurex.com) trading API library for Clojure.
+Unofficial [Vircurex](https://vircurex.com) [trading API library](https://vircurex.com/welcome/api) for Clojure.
 
-WARNING: This is incomplete.
+WARNING: This is alpha software. Do not use in production.
 
 ## Installation
 
-Download from https://github.com/jphackworth/clj-vircurex.
+      $ git clone https://github.com/jphackworth/clj-vircurex.
 
-This assumes an environment with Clojure 1.5.1 and Leiningen (https://github.com/technomancy/leiningen) installed.
+This assumes an environment with Clojure 1.5.1 and [Leiningen](https://github.com/technomancy/leiningen) installed.
 
 ## Usage
 
 ### Configuration
 
-See the example configuration file in doc/clj-vircurex.toml.example
+See the example configuration file in [doc/clj-vircurex.toml.example](https://github.com/jphackworth/clj-vircurex/blob/master/doc/clj-vircurex.toml.example)
 
 Create a file in $HOME/.clj-vircurex.toml using the above as a template. Fill out the keys
 to match your settings on Vircurex.
@@ -24,6 +24,18 @@ to match your settings on Vircurex.
     $ lein repl
 
 ## Implemented
+
+Most authenticated api calls have two ways of using them.
+
+The "full" version which most closely matches the API documentation, and a "simplified" version which usually reduces verbosity. 
+
+Generally speaking, the full version function name will have a -order/-orders. For instance: 
+
+      (delete-order [x]) ; versus 
+      (delete [x]) 
+
+      (create-order [otype currency amount unitprice]) ; versus 
+      (buy [currency amount unitprice])
 
 ### Get market data
 
@@ -35,19 +47,17 @@ The limit of fetch frequency is 5 seconds. While testing, to minimise being thro
 
     (def mkt (get-market-data))
 
-
-
 ### Get Order
 
-Full read-orders version:
+Full version:
 
     (read-orders 0) ; 0 = unreleased
     (read-orders 1) ; 1 = released
 
 Simplified:
 
-    (unreleased-orders)
-    (released-orders)
+    (unreleased) ; unreleased orders
+    (released) ; released orders
 
 These may change to unreleased/released in future.
 
@@ -59,14 +69,14 @@ To get your complete list of balances
 
 To get a balance for specific currency
 
-    (get-balances "nmc") ; this may change to using keywords instead of strings... ie :nmc vs "nmc"
+    (get-balances :nmc) 
 
 ### Create Order
 
 Full create-order version:
 
-    (create-order "BUY" "ltc" 1.0005 0.0008) ; order type, currency, amount, unit price
-    (create-order "SELL" "ltc" 1.0005 10.001)
+    (create-order :buy :ltc 1.0005 0.0008) ; order type, currency, amount, unit price
+    (create-order :sell :ltc 1.0005 10.001)
 
 Simplified buy/sell:
 
@@ -89,9 +99,20 @@ Simplified delete example:
     (def my-order (buy :ltc 1.005 0.0008)) ; saves order info to "my-order"
     (delete my-order)
 
+### Release Order
+
+Full version:
+
+    (release-order 12345)
+
+Simplified
+
+    (def my-order (buy :ltc 1.005 0.0008))
+    (release my-order)
+
 ### Bugs
 
-Lots of API functionality isn't implemented.
+No testing implemented. You should not use this in production.
 
 ## License
 

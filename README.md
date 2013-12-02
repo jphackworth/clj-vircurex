@@ -25,6 +25,15 @@ to match your settings on Vircurex.
 
 ## Implemented
 
+* [Get Market Data](https://github.com/jphackworth/clj-vircurex#get-market-data)
+* [Read Orders](https://github.com/jphackworth/clj-vircurex#read-orders)
+* [Get Balances](https://github.com/jphackworth/clj-vircurex#get-balances)
+* [Create Order](https://github.com/jphackworth/clj-vircurex#create-order)
+* [Delete Order](https://github.com/jphackworth/clj-vircurex#delete-order)
+* [Release Order](https://github.com/jphackworth/clj-vircurex#release-order)
+
+### Design Discussion
+
 Most authenticated api calls have two ways of using them.
 
 The "full" version which most closely matches the API documentation, and a "simplified" version which usually reduces verbosity. 
@@ -47,7 +56,7 @@ The limit of fetch frequency is 5 seconds. While testing, to minimise being thro
 
     (def mkt (get-market-data))
 
-### Get Order
+### Read Orders
 
 Full version:
 

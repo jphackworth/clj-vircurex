@@ -78,6 +78,8 @@
       api-key (username) t txid (nth args 0)))
     "read_orders" (sha256 (format "%s;%s;%s;%s;read_orders" 
       api-key (username) t txid))
+    "read_order" (sha256 (format "%s;%s;%s;%s;read_order;%s" 
+      api-key (username) t txid (nth args 0)))
     "read_orderexecutions" (sha256 (format "%s;%s;%s;%s;read_orderexecutions:%s" 
       api-key (username) t txid (nth args 0)))
     "create_order" (sha256 (format "%s;%s;%s;%s;create_order;%s;%s;%s;%s;btc" 
@@ -95,6 +97,7 @@
     "get_balances" ""
     "get_balance" (format "&currency=%s" (nth args 0))
     "read_orders" (format "&otype=%s" (nth args 0))
+    "read_order" (format "&orderid=%d&otype=test" (nth args 0))
     "read_orderexecutions" (format "&orderid=%s" (nth args 0))
     "create_order" (format "&ordertype=%s&amount=%s&currency1=%s&unitprice=%s&currency2=btc"
       (nth args 0) (nth args 1) (nth args 2) (nth args 3))
@@ -133,6 +136,12 @@
   (case true
     true  (select-keys orders (for [[k v] orders :when (re-find #"^order-.+$" k)] k))
     "default" orders))
+
+(defn read-order 
+  "Read order based on supplied order id and type" [orderid]
+  (api-get (url-for "read_order" orderid "test"))
+
+  )
 
 (defn delete-order 
   "(delete-order <orderid>" [orderid]

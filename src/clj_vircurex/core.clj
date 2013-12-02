@@ -81,7 +81,11 @@
     "read_orderexecutions" (sha256 (format "%s;%s;%s;%s;read_orderexecutions:%s" 
       api-key (username) t txid (nth args 0)))
     "create_order" (sha256 (format "%s;%s;%s;%s;create_order;%s;%s;%s;%s;btc" 
-      api-key (username) t txid (nth args 0) (nth args 1) (nth args 2) (nth args 3)))))
+      api-key (username) t txid (nth args 0) (nth args 1) (nth args 2) (nth args 3)))
+    "delete_order" (sha256 (format "%s;%s;%s;%s;delete_order;%s;%s"
+      api-key (username) t txid (nth args 0) (nth args 1)))
+
+  ))
 
 (defn query-for
   "Create query for specified API call" [api-call args]
@@ -91,7 +95,9 @@
     "read_orders" (format "&otype=%s" (nth args 0))
     "read_orderexecutions" (format "&orderid=%s" (nth args 0))
     "create_order" (format "&ordertype=%s&amount=%s&currency1=%s&unitprice=%s&currency2=btc"
-      (nth args 0) (nth args 1) (nth args 2) (nth args 3))))
+      (nth args 0) (nth args 1) (nth args 2) (nth args 3))
+    "delete_order" (format "&orderid=%s&otype=%s" (nth args 0) (nth args 1)))
+  )
 
 (defn url-for
   "Create URL for specified API call" [api-call & args]
@@ -125,14 +131,17 @@
     true  (select-keys orders (for [[k v] orders :when (re-find #"^order-.+$" k)] k))
     "default" orders))
 
-;(defn delete-order 
+(defn delete-order 
+  "(delete-order <orderid> <BUY|SELL>" [orderid otype]
+    (api-get (url-for "delete_order" orderid otype)))
+
 
 (defn create-order 
   "(create-order <BUY|SELL> <currency> <amount> <unitprice>)" [otype currency & args]
   (def amount (nth args 0))
   (def unitprice (float (nth args 1)))
 
-  (printf "Creating %s order: %s %s at %s BTC\n" (clojure.string/lower-case otype) amount (clojure.string/upper-case currency) unitprice)
+  (printf "Creating %s order: %.8f %s at %.8f BTC\n" (clojure.string/lower-case otype) amount (clojure.string/upper-case currency) unitprice)
   (api-get (url-for "create_order" otype amount  currency unitprice)))
 
 ; simplified calls

@@ -175,6 +175,11 @@
   "Read unreleased orders" []
   (read-orders 0))
 
+(defn delete
+  "Deletes the supplied order" [order]
+  (delete-order (order "orderid") (order "otype"))
+  )
+
 (defn get-market-data
   "Returns market data from Vircurex in PersistentMap format"
   [& args]

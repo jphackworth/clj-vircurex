@@ -173,7 +173,12 @@ Simplified
 
 ### Bugs
 
-No testing implemented. You should not use this in production.
+- No testing implemented. 
+- Configuration subject to change
+- API subject to change
+- No support for Fee / Profit calculations
+
+You should not use this in production.
 
 ## License
 

@@ -9,13 +9,13 @@
 
   (:require [clojure.data.json :as json]
     [org.httpkit.client :as http]
-    [clj-time.core :as j]
-    [clojure.string :as str])   
+    [clj-time.core :as j])   
   (:use [pandect.core]
     [clj-time.local]
     [clj-time.format]
     [clojure.java.io]
     [clj-toml.core]
+    [clojure.string :only (upper-case)]
     ))
 
 ;)
@@ -50,7 +50,7 @@
   "Returns the API keys defined in $HOME/.clj-vircurex.toml" []
   ((config) "keys"))
 
-(defn upper-keyword [k] (-> k name clojure.string/upper-case keyword) )
+(defn upper-keyword [k] (-> k name upper-case keyword) )
 
 ; api call helpers
 
@@ -143,7 +143,7 @@
     (def response @(http/get url options))
     (if json (json/read-str (response :body) :key-fn keyword) (response :body)))
 
-(defn keyword-to-upper [k] (clojure.string/upper-case (name k)))
+(defn keyword-to-upper [k] (upper-case (name k)))
 
 ; api calls
 
@@ -188,6 +188,8 @@
 
 ; simplified calls
 
+(defn upper-test [x] (upper-case x))
+
 (defn buy 
   [currency amount unitprice]
     (create-order :buy currency amount unitprice))
@@ -206,7 +208,8 @@
 (defn released [& currency]
   (if (nil? currency)
     (read-orders 1)
-    (println "sort by %s" currency) ))
+    (filter #(= (:currency1 %) (keyword-to-upper (nth currency 0))) (read-orders 1)) 
+    ))
 
 (defn unreleased
   "Read unreleased orders" []
@@ -218,7 +221,7 @@
 
 (defn release 
   "Releases the order based on the orderid in supplied map" [order]
-  (release-order :orderid order))
+  (release-order :orderid (order :orderid)))
 
 
 (defn market-data-fetch []

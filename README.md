@@ -6,7 +6,10 @@ WARNING: This is alpha software. Do not use in production.
 
 ## Installation
 
+Note - v0.0.2 is the tagged version to get, as v0.0.3 is undergoing a lot of change and documentation hasn't been updated yet.
+
     $ git clone https://github.com/jphackworth/clj-vircurex
+    $ git checkout tags/v0.0.2 
 
 
 This assumes an environment with Clojure 1.5.1 and [Leiningen](https://github.com/technomancy/leiningen) installed.

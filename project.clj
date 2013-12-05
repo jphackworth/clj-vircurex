@@ -12,6 +12,7 @@
                   [clj-toml "0.3.1"]
                   [org.clojure/tools.namespace "0.2.4"]
                   [criterium "0.4.2"]
+                  [org.clojure/core.cache "0.6.3"]
                   ;[org.clojure/clojurescript "0.0-2060"]
                    ;[org.clojure/tools.reader "0.7.10"]
                  ;[org.clojure/tools.nrepl "0.2.3" :exclusions [[org.clojure/clojure]]]

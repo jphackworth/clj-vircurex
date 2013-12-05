@@ -122,7 +122,23 @@
 
 ;   (json/read-str ((client/get url) :body)))
 
-(defn api-get2 
+(defn api-get3 
+  [url & {:keys [json async]
+          :or {json true async false}}]
+  
+  
+  )
+
+
+(defn api-get2
+  "api-get2 is designed for concurrent usage.
+  
+  It does not block and wait for a response and then return the parsed
+  version (which api-get does)
+  
+  
+  
+  "
   [url]
     (def options {:method :get 
       :content-type "application/json"
@@ -168,11 +184,12 @@
 ; Bugged?
 
 (defn read-orderexecutions 
-  [& {:keys [orderid ordertype]}]
+  ;[& {:keys [orderid ordertype]}]
+  [& [orderid ordertype]]
   (api-get :url (url-for "read_orderexecutions" orderid ordertype)))
 
 (defn delete-order 
-  [& {:keys [orderid ordertype]}]
+  [& [orderid ordertype]]
     (api-get :url (url-for "delete_order" orderid ordertype)))
 
 (defn release-order
@@ -180,40 +197,76 @@
    [& {:keys [orderid]}]
   (api-get :url (url-for "release_order" orderid)))
 
-(defn create-order 
-  [otype currency & args]
-  (def amount (nth args 0))
-  (def unitprice (float (nth args 1)))
-  (api-get :url (url-for "create_order" (keyword-to-upper otype) amount (name currency) unitprice)))
+(defn create-order
+  "This is used to create a new BUY or SELL order. It does not release the trade automatically
+  
+  Example:
+  (create-order :otype \"BUY\" :currency \"LTC\" :amount 1 :unitprice 0.0001) 
+  
+  Notes:
+  otype: use \"BUY\" or \"SELL\"
+  currency: use upper-case string version of currency. \"LTC\", \"NMC\", etc. 
+  "
+  [& {:keys [otype currency amount unitprice]}]
+  ;(def amount (nth args 0))
+  ;(def unitprice (float (nth args 1)))
+  (api-get :url (url-for "create_order" otype amount currency unitprice)))
 
 ; simplified calls
 
-(defn upper-test [x] (upper-case x))
-
 (defn buy 
+  "This is a simplified buy function,  intended for repl use. 
+  
+  In applications using this library, you should use create-order instead.
+  
+  Arguments:
+  (buy :currency amount unitprice_in_btc)
+  
+  Example:
+  (buy :ltc 1 0.0001)
+  
+  Caveats:
+  - This does not automatically release the order. 
+  - Make sure that you get the position of amount and unitprice correctly!
+  " 
+  
   [currency amount unitprice]
-    (create-order :buy currency amount unitprice))
+    (create-order :otype "BUY" :currency (name currency) :amount amount :unitprice unitprice))
     
 
 (defn sell
-  "(sell <:currency> <amount> <unitprice>" [currency amount unitprice]
-    (def response (create-order :sell currency amount unitprice)) 
-    (case (response "status")
-      0 (printf "Order ID: %s\n" (response "orderid"))
-      (printf "Error: %s\n" (response "statustxt")))
-    response)
+  "This is a simplified sell function,  intended for repl use. 
+  
+  In applications using this library, you should use create-order instead.
+  
+  Arguments:
+  (sell :currency amount unitprice_in_btc)
+  
+  Example:
+  (sell :ltc 1 1)
+  
+  Caveats:
+  - This does not automatically release the order. 
+  - Make sure that you get the position of amount and unitprice correctly!
+  " 
+  [currency amount unitprice]
+  (create-order :otype "SELL" currency: (name currency) :amount amount :unitprice unitprice))
+   
 
 (defn balance [currency] (((get-balances) :balances) (upper-keyword currency))) 
 
-(defn released [& currency]
+(defn released [& [currency]]
   (if (nil? currency)
     (read-orders 1)
-    (filter #(= (:currency1 %) (keyword-to-upper (nth currency 0))) (read-orders 1)) 
+    (filter #(= (:currency1 %) (keyword-to-upper currency )) (read-orders 1)) 
     ))
 
 (defn unreleased
-  "Read unreleased orders" []
-  (read-orders 0))
+  "Read unreleased orders" [& [currency]]
+  (if (nil? currency)
+    (read-orders 0)
+    (filter #(= (:currency1 %) (keyword-to-upper currency)) (read-orders 0))
+    ))
 
 (defn delete
   "Deletes order based on the orderid in supplied map" [order]

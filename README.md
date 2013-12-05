@@ -41,6 +41,8 @@ to match your settings on Vircurex.
 
 ## Usage
 
+NOTE: These documents are outdated post v0.0.2
+
 ### Using Interactively in REPL
 
     $ cd clj-vircurex
@@ -76,14 +78,16 @@ If you're using Leiningen:
 
 Most authenticated api calls have two ways of using them.
 
-The "full" version which more closely matches the [trading API documentation](https://vircurex.com/welcome/api), and a "simplified" version which usually reduces verbosity, intended for interactive use at repl console. 
+- "Full version": This function more closely matches the [trading API documentation](https://vircurex.com/welcome/api). It's intended to be
+used from applications, so the parameters are more verbose.
+- "Simplified version": This function usually reduces verbosity, intended for interactive use at repl console. 
 
 Generally speaking, the full version function name will have a -order/-orders. For instance: 
 
-    (create-order :buy :ltc 1.005 0.008) ; versus 
+    (create-order :otype "BUY" :currency "LTC" :amount 1.005 :unitprice 0.008) ; versus 
     (buy :ltc 1.005 0.008)
 
-    (delete-order 12345) ; versus
+    (delete-order :orderid 12345 :ordertype "buy") ; versus
 
     (def myorder (buy :ltc 1.005 0.0008))
     (delete (myorder)) 
